@@ -1,0 +1,6 @@
+bind: 0.0.0.0:8080
+commands: [tail, grep, awk]
+files:
+    {% for file in tailon_logfiles %}
+        - {{ file }}
+    {% endfor %}

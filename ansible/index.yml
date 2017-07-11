@@ -1,0 +1,39 @@
+# Before building Docker image rename this file to index.yml then fill the vars
+# Default values are mostly dummy strings
+# For MySQL it is tested with tutum/mariadb docker images
+- hosts: localhost
+  roles:
+    - apache
+    - mbasanta.pip
+    - tailon
+    - geerlingguy.filebeat
+    - geerlingguy.composer
+  vars:
+    - tailon_logfiles:
+          - /var/log/shibboleth/transaction.log
+          - /var/log/apache2/access.log
+          - /var/log/apache2/error.log
+          - /var/log/apache2/other_vhosts_access.log
+          - /var/log/apache2/project.local_access.log
+    - filebeat_prospectors:
+        - input_type: log
+          paths:
+            - "/var/log/apache2/access.log"
+          fields:
+            #{{ ansible_env.logstash_field_name }}: apache-usec
+            hexaa_dev_apache: apache-usec
+    #- filebeat_output_logstash_hosts:
+        #- {{ ansible_env.logstash_host_port }}
+    - custom_logformat: '"%h %l %u %t \"%r\" %>s %O %D \"%{Referer}i\" \"%{User-Agent}i\""'
+
+      # - simplesamlphp:
+      #     - /tmp/simplesamlphp.log
+  tasks:
+    - name: install vim
+      apt:
+        name:  vim
+        state: installed
+    - name: install curl
+      apt:
+        name:  curl
+        state: installed
