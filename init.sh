@@ -2,16 +2,18 @@
 
 echo Set hostname from environment variable
 
-if [[ -n "$PROJECT_HOSTNAME" ]]; then
-	echo -- hostname
-	echo 127.0.0.1 "$PROJECT_HOSTNAME" >> /etc/hosts
+if [[ -z "$PROJECT_HOSTNAME" ]]; then
+    export PROJECT_HOSTNAME=project.local
+fi
 
-	echo -- apache cert
-	openssl req -new -nodes -x509 -subj "/C=HU/ST=Budapest/L=Budapest/O=IT/CN=$PROJECT_HOSTNAME" -days 3650 -keyout /etc/ssl/private/project.local.key -out /etc/ssl/certs/project.local.crt
+echo -- hostname
+echo 127.0.0.1 "$PROJECT_HOSTNAME" >> /etc/hosts
 
-	echo -- apache
-	sed -i -e "s/project.local/$PROJECT_HOSTNAME/g" /etc/apache2/sites-available/000-default.conf
- fi
+echo -- apache cert
+openssl req -new -nodes -x509 -subj "/C=HU/ST=Budapest/L=Budapest/O=IT/CN=$PROJECT_HOSTNAME" -days 3650 -keyout /etc/ssl/private/project.local.key -out /etc/ssl/certs/project.local.crt
+
+echo -- apache
+sed -i -e "s/project.local/$PROJECT_HOSTNAME/g" /etc/apache2/sites-available/000-default.conf
 
 
 echo Set relative document root
