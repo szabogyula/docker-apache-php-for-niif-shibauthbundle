@@ -10,7 +10,7 @@ echo -- hostname
 echo 127.0.0.1 "$PROJECT_HOSTNAME" >> /etc/hosts
 
 echo -- apache cert
-openssl req -new -nodes -x509 -subj "/C=HU/ST=Budapest/L=Budapest/O=IT/CN=$PROJECT_HOSTNAME" -days 3650 -keyout /etc/ssl/private/project.local.key -out /etc/ssl/certs/project.local.crt
+openssl req -new -nodes -x509 -subj "/C=HU/ST=Budapest/L=Budapest/O=IT/CN=$PROJECT_HOSTNAME" -days 3650 -keyout /etc/ssl/private/${PROJECT_HOSTNAME}.key -out /etc/ssl/certs/${PROJECT_HOSTNAME}.crt
 
 echo -- apache
 sed -i -e "s/project.local/$PROJECT_HOSTNAME/g" /etc/apache2/sites-available/000-default.conf
@@ -25,13 +25,10 @@ echo start apache2
 apachectl start
 
 echo warm up logfiles
-if [[ -n "$PROJECT_HOSTNAME" ]]; then
-	curl -s -k https://"$PROJECT_HOSTNAME"/ > /dev/null
-	curl -s -k https://"$PROJECT_HOSTNAME"/app_dev.php > /dev/null
-else
-	curl -s -k https://project.local/ > /dev/null
-	curl -s -k https://project.local/app_dev.php > /dev/null
-fi
+curl -s -k https://"$PROJECT_HOSTNAME"/ > /dev/null
+curl -s -k https://"$PROJECT_HOSTNAME"/app_dev.php > /dev/null
+curl -s -k https://project.local/ > /dev/null
+curl -s -k https://project.local/app_dev.php > /dev/null
 
 echo append logfiles to tailon
 for i in $(echo $LOGFILES | sed "s/,/ /g")
