@@ -38,8 +38,9 @@
     SSLEngine on
     SSLOptions +StdEnvVars +ExportCertData
 
-    SSLCertificateFile    /etc/ssl/certs/project.local.crt
-    SSLCertificateKeyFile /etc/ssl/private/project.local.key
+    SSLCertificateFile    /etc/pki/project.local.crt
+    SSLCertificateKeyFile /etc/pki/project.local.key
+    #SSLCertificateChainFile /etc/pki/DigiCertCA.crt
 
     <Directory /var/www/project/web>
            Options Indexes FollowSymLinks

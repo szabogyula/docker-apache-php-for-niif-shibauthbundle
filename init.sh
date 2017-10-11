@@ -10,11 +10,17 @@ echo -- hostname
 echo 127.0.0.1 "$PROJECT_HOSTNAME" >> /etc/hosts
 
 echo -- apache cert
-openssl req -new -nodes -x509 -subj "/C=HU/ST=Budapest/L=Budapest/O=IT/CN=$PROJECT_HOSTNAME" -days 3650 -keyout /etc/ssl/private/${PROJECT_HOSTNAME}.key -out /etc/ssl/certs/${PROJECT_HOSTNAME}.crt
+if [[ ! -f /etc/pki/${PROJECT_HOSTNAME}.key ]]; then
+  mkdir /etc/pki
+  openssl req -new -nodes -x509 -subj "/C=HU/ST=Budapest/L=Budapest/O=IT/CN=$PROJECT_HOSTNAME" -days 3650 -keyout /etc/pki/${PROJECT_HOSTNAME}.key -out /etc/pki/${PROJECT_HOSTNAME}.crt
+fi
 
 echo -- apache
 sed -i -e "s/project.local/$PROJECT_HOSTNAME/g" /etc/apache2/sites-available/000-default.conf
 
+if [[ -f /etc/pki/DigiCertCA.crt ]]; then
+    sed -i -e "s/#SSLCertificateChainFile/SSLCertificateChainFile/g" /etc/apache2/sites-available/000-default.conf
+fi
 
 echo Set relative document root
 if [[ -n "$DOCUMENT_ROOT" ]]; then
@@ -27,8 +33,6 @@ apachectl start
 echo warm up logfiles
 curl -s -k https://"$PROJECT_HOSTNAME"/ > /dev/null
 curl -s -k https://"$PROJECT_HOSTNAME"/app_dev.php > /dev/null
-curl -s -k https://project.local/ > /dev/null
-curl -s -k https://project.local/app_dev.php > /dev/null
 
 echo append logfiles to tailon
 for i in $(echo $LOGFILES | sed "s/,/ /g")
